@@ -1,3 +1,4 @@
+from typing import Union
 from gamygdala.concepts import Emotion, Goal, Belief, Relation
 
 '''
@@ -32,36 +33,36 @@ class Agent:
 		self.mapPAD['gratification']=[0.69,0.57,0.63]#triumphant
 		self.mapPAD['remorse']=[-0.57,0.28,-0.34]#guilty
 	
-	def addGoal(self, goal):
+	def addGoal(self, goal: Goal):
 		self.goals.append(goal)
 	
-	def removeGoal(self, goalName):
+	def removeGoal(self, goalName: str) -> bool:
 		for i in range(len(self.goals)):
 			if self.goals[i].name == goalName:
 				self.goals.pop(i)
 				return True
 		return False
 	
-	def hasGoal(self, goalName):
+	def hasGoal(self, goalName: str) -> bool:
 		for i in range(len(self.goals)):
 			if self.goals[i].name == goalName:
 				return True
 		return False
 	
-	def getGoalByName(self, goalName):
+	def getGoalByName(self, goalName: str) -> Union[Goal, None]:
 		for i in range(len(self.goals)):
 			if self.goals[i].name == goalName:
 				return self.goals[i]
 		return None
 	
-	def setGain(self, gain):
+	def setGain(self, gain: int):
 		assert gain > 0 and gain  <= 20, 'Error: gain factor for appraisal integration must be between 0 and 20'
 		self.gain = gain
 	
-	def appraise(self, belief):
+	def appraise(self, belief: Belief):
 		self.gamygdalaInstance.appraise(belief, self)
 
-	def updateEmotionalState(self, emotion):
+	def updateEmotionalState(self, emotion: Emotion):
 		for i in range(len(self.internalState)):
 			if self.internalState[i].name == emotion.name:
 				#Appraisals simply add to the old value of the emotion
@@ -80,7 +81,7 @@ class Agent:
 	@param {boolean} useGain Whether to use the gain function or not.
 	@return {gamygdala.Emotion[]} An array of emotions.
 	'''
-	def getEmotionalState(self, useGain):
+	def getEmotionalState(self, useGain: bool) -> list:
 		if useGain:
 			gainState=[]
 			for i in range(len(self.internalState)):
@@ -99,7 +100,7 @@ class Agent:
 	@param {boolean} useGain Whether to use the gain function or not.
 	@return {double[]} An array of doubles with Pleasure at index 0, Arousal at index [1] and Dominance at index [2].
 	'''
-	def getPADState(self, useGain):
+	def getPADState(self, useGain: bool) -> list[int]:
 		PAD=[0, 0, 0]
 		for i in range(len(self.internalState)):
 			PAD[0] += self.internalState[i].intensity*self.mapPAD[self.internalState[i].name][0]
@@ -120,7 +121,7 @@ class Agent:
 	@method gamygdala.Agent.printEmotionalState
 	@param {boolean} useGain Whether to use the gain function or not.
 	'''
-	def printEmotionalState(self, useGain):
+	def printEmotionalState(self, useGain: bool):
 		output = self.name + ' feels '
 		emotionalState=self.getEmotionalState(useGain)
 		k = 0
@@ -135,7 +136,7 @@ class Agent:
 	@param {String} agentName The agent who is the target of the relation.
 	@param {double} like The relation (between -1 and 1).
 	'''
-	def updateRelation(self, agentName, like):
+	def updateRelation(self, agentName: str, like: float):
 		if not self.hasRelationWith(agentName):
 			#This relation does not exist, just add it.
 			self.currentRelations.append(Relation(agentName,like))   
@@ -151,7 +152,7 @@ class Agent:
 	@param {String} agentName The agent who is the target of the relation.
 	@param {boolean} True if the relation exists, otherwise false.
 	'''
-	def hasRelationWith(self, agentName):
+	def hasRelationWith(self, agentName: str) -> bool:
 		return self.getRelation(agentName) is not None
 
 	'''
@@ -160,19 +161,23 @@ class Agent:
 	@param {String} agentName The agent who is the target of the relation.
 	@param {gamygdala.Relation} The relation object or null if non existing.
 	'''
-	def getRelation(self, agentName):
+	def getRelation(self, agentName: str) -> Union[list, None]:
 		for i in range(len(self.currentRelations)):
 			if self.currentRelations[i].agentName == agentName:
 				return self.currentRelations[i]    
 		return None
 
 
+	def printAllRelations(self):
+		for r in self.currentRelations:
+			print(r)
+
 	'''
 	Returns the relation object this agent has with the agent defined by agentName.
 	@method gamygdala.Agent.printRelations
 	@param {String} [agentName] The agent who is the target of the relation will only be printed, or when omitted all relations are printed.
 	'''
-	def printRelations(self, agentName):
+	def printRelations(self, agentName: str):
 		output = self.name + ' has the following sentiments:\n   '
 		found=False
 		for i in range(len(self.currentRelations)):
