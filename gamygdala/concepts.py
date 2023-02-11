@@ -1,5 +1,8 @@
+from typing import Union
+from gamygdala.engines import Engine
+
 class Emotion:
-    def __init__(self, name="joy", intensity=0):
+    def __init__(self, name: str = "joy", intensity: float = 0.0):
         self.name = name
         self.intensity = intensity
     
@@ -7,7 +10,7 @@ class Emotion:
         return "Emotion: name(" + self.name + "), intensity(" + str(self.intensity) + ")."
 
 class Goal:
-    def __init__(self, name="main", utility=1.0, isMaintenanceGoal=False):
+    def __init__(self, name: str = "main", utility: float = 1.0, isMaintenanceGoal: bool = False):
         self.name = name
         self.utility = utility
         self.likelihood = 0.5
@@ -21,7 +24,7 @@ class Goal:
         return "Goal: name(" + self.name + "), utility(" + str(self.utility) + "), likelihood(" + str(self.likelihood) + ")." 
 
 class Belief:
-    def __init__(self, likelihood=0.0, causalAgentName='', affectedGoalNames=None, goalCongruences=None, isIncremental=False):
+    def __init__(self, likelihood: float = 0.0, causalAgentName: str = '', affectedGoalNames: Union[list[str], None] = None, goalCongruences: Union[list[int], None] = None, isIncremental: bool = False):
         self.likelihood = likelihood
         self.causalAgentName = causalAgentName
         if affectedGoalNames is None:
@@ -39,12 +42,12 @@ class Belief:
         return "Belief: Causal Agent (" + self.causalAgentName + "), Likelihood (" + str(self.likelihood) + "), AffectedGoald(" + str(self.affectedGoalNames) + ") Goal Congruences(" + str(self.goalCongruences) + ")."
 
 class Relation:
-    def __init__(self, targetName, like=1.0):
+    def __init__(self, targetName: str, like: float = 1.0):
         self.agentName = targetName
         self.like = like
         self.emotionList = []
 
-    def addEmotion(self, emotion):
+    def addEmotion(self, emotion: Emotion):
         added = False
         for  i in range( len(self.emotionList) ):
             if self.emotionList[i].name == emotion.name:
@@ -58,7 +61,7 @@ class Relation:
             #copy on keep, we need to maintain a list of current emotions for the relation, not a list refs to the appraisal engine
             self.emotionList.append(Emotion(emotion.name, emotion.intensity))
 
-    def decay(self, gamygdalaInstance):
+    def decay(self, gamygdalaInstance: Engine):
         for  i in range( len(self.emotionList) ):
             newIntensity=gamygdalaInstance.decayFunction(self.emotionList[i].intensity)
             if newIntensity < 0:
