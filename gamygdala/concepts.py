@@ -1,5 +1,4 @@
 from typing import Union
-from gamygdala.engines import Engine
 
 class Emotion:
     def __init__(self, name: str = "joy", intensity: float = 0.0):
@@ -61,9 +60,9 @@ class Relation:
             #copy on keep, we need to maintain a list of current emotions for the relation, not a list refs to the appraisal engine
             self.emotionList.append(Emotion(emotion.name, emotion.intensity))
 
-    def decay(self, gamygdalaInstance: Engine):
+    def decay(self, decayFunction):
         for  i in range( len(self.emotionList) ):
-            newIntensity=gamygdalaInstance.decayFunction(self.emotionList[i].intensity)
+            newIntensity=decayFunction(self.emotionList[i].intensity)
             if newIntensity < 0:
                 #This emotion has decayed below zero, we need to remove it.
                 self.emotionList.pop(i)
