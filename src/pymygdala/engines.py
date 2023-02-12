@@ -1,7 +1,7 @@
 from typing import Union
 
-from gamygdala.agent import Agent
-from gamygdala.concepts import Goal, Relation, Belief, Emotion
+from pymygdala.agent import Agent
+from pymygdala.concepts import Goal, Relation, Belief, Emotion
 import time
 import math
 
@@ -258,7 +258,7 @@ class Gamygdala:
                                         print(self.agents[k].name, ' has NO relationship with ', owner.name)
         else:
             #check only affectedAgent (which can be much faster) and does not involve console output nor checks
-            for i in len(belief.affectedGoalNames):
+            for i in range(len(belief.affectedGoalNames)):
                 #Loop through every goal in the list of affected goals by self event.
                 currentGoal=affectedAgent.getGoalByName(belief.affectedGoalNames[i])
                 utility = currentGoal.utility

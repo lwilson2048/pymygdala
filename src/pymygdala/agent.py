@@ -1,5 +1,5 @@
 from typing import Union
-from gamygdala.concepts import Emotion, Goal, Belief, Relation
+from pymygdala.concepts import Emotion, Goal, Belief, Relation
 
 '''
 self is the emotion agent class taking care of emotion management for one entity 
