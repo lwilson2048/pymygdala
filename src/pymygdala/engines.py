@@ -311,7 +311,7 @@ class Gamygdala:
         #And two types of goals: maintenance and achievement. If an achievement goal (the default) is -1 or 1, we can't change it any more (unless externally and explicitly by changing the goal.likelihood).
         oldLikelihood = goal.likelihood 
         newLikelihood = None
-        if goal.isMaintenanceGoal==False and (oldLikelihood >= 1.0 or oldLikelihood <= -1.0):
+        if goal.maintenanceGoal == False and (oldLikelihood >= 1.0 or oldLikelihood <= -1.0):
             return 0.0
         
         if (goal.calculateLikelyhood is not None):

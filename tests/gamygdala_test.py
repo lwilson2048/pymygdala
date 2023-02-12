@@ -8,15 +8,13 @@ from pymygdala.agent import Agent
 
 random.seed(2)
 
-# TODO: The beliefs are "Maintenance Goals", the opposite of achievement goals
+# TODO: The goals are "Maintenance Goals", the opposite of achievement goals
 
 # The things that agents have opinions about and Articles discuss
 ALLOWED_THINGS = ["\N{baby}", "\N{rat}", "\N{cat}", "\N{dog}", "\N{potato}"]
 
 # Number of personal opinions per agent
 NUM_OPINIONS = 5
-
-NUM_AGENTS = 5
 
 NAMES = ["John", "Jan", "Juan", "Jean", "Johann"]
 
@@ -31,7 +29,15 @@ agents : dict[str, Agent] = {}
 # ie {agent_name: {goal_name: goal}}
 goals : dict[str, dict[str: Goal]] = {}
 
-def fuzzyOpinion(opinion) -> str:
+def generateReactionForAgent(g_agent):
+    print(g_agent.getEmotionalState(True))
+
+def printAgentHistory(agent: str, pads_per_step: list[dict[str, list[float]]], article_history: list[tuple[str, float]]):
+    print("%s's PAD History" % agent)
+    for step in range(len(pads_per_step)):
+        print("An article %s -> %s" % (article_history[step], pads_per_step[step][agent]))
+
+def fuzzyOpinion(opinion: float) -> str:
     if opinion >= 0.6:
         return "loves"
     elif opinion >= 0.10:
@@ -81,7 +87,7 @@ def generateAgent(engine, agent_name):
         print("%s %s %s" % (agent_name, fuzzyOpinion(opinion[1]), opinion[0]))
 
         #Create a Goal object and ensure we register it
-        goal = Goal(goal_name, opinion[1])
+        goal = Goal(goal_name, opinion[1], False)
 
         goals[agent_name][goal_name] = goal
         engine.registerGoal(goal)
@@ -102,23 +108,27 @@ for e in nx.edges(G):
     engine.createRelation(e[0], e[1], G.edges[e]['relationship'])
     engine.createRelation(e[1], e[0], G.edges[e]['relationship'])
 
-showGraph(G)
+#showGraph(G)
 
 NUM_ROUNDS = 10
 likelihood = 1.0 / float(NUM_ROUNDS)
 DECAY_SPEED = 2
 EMO_GAIN = 20
 engine.setGain(EMO_GAIN)
-
-def generateReactionForAgent(g_agent):
-    print(g_agent.getEmotionalState(True))
     
+article_history = []
+
+#pads_per_step[step][agent] = [Their PAD state at step]
+pads_per_step: list[dict[str, list[float]]] = []
 
 for round in range(NUM_ROUNDS):
     # Generate the article
     article = (random.choice(ALLOWED_THINGS), random.uniform(-1.0, 1.0))
+    article_history.append(article)
     print("------------------------------------")
     print("Round %d article: (%s, %s)" % (round, article[0], fuzzyOpinion(article[1])))
+
+    step_pads: dict[str, list[float]] = {}
 
     # Submit the article for agents to review
     for agent_name, g_agent in agents.items():
@@ -140,7 +150,10 @@ for round in range(NUM_ROUNDS):
         # "Jim who likes rats"
         print("%s who %s %s: " % (agent_name, fuzzyOpinion(agent_opinion), article[0]))
         print(g_agent.getPADState(True))
+        step_pads[agent_name] = g_agent.getPADState(True)
         print("++++")
+
+    pads_per_step.append(step_pads)
 
     #engine.printAllEmotions()
 
@@ -151,4 +164,6 @@ for round in range(NUM_ROUNDS):
 
 # Print out the graph again
 
-showGraph(G)
+#showGraph(G)
+
+printAgentHistory("John", pads_per_step, article_history)
