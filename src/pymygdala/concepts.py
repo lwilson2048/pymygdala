@@ -47,10 +47,10 @@ class Relation:
         added = False
         for  i in range( len(self.emotionList) ):
             if self.emotionList[i].name == emotion.name:
-                '''
+                """
                 if (this.emotionList[i].intensity < emotion.intensity){
                     this.emotionList[i].intensity = emotion.intensity;
-                }'''
+                }"""
                 self.emotionList[i].intensity += emotion.intensity
                 added = True
         if added:

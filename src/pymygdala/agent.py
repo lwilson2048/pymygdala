@@ -1,13 +1,13 @@
 from typing import Union
 from pymygdala.concepts import Emotion, Goal, Belief, Relation
 
-'''
-self is the emotion agent class taking care of emotion management for one entity 
-@class pygamygdala.Agent
-@constructor 
-@param {String} name The name of the agent to be created. self name is used as ref throughout the appraisal engine.
-'''
 class Agent:
+	"""
+	self is the emotion agent class taking care of emotion management for one entity 
+	@class pygamygdala.Agent
+	@constructor 
+	@param {String} name The name of the agent to be created. self name is used as ref throughout the appraisal engine.
+	"""
 	def __init__(self, name='agent'):
 		self.name = name
 		self.goals = []
@@ -73,15 +73,15 @@ class Agent:
 		#copy on keep, we need to maintain a list of current emotions for the state, not a list references to the appraisal engine
 		self.internalState.append(Emotion(emotion.name, emotion.intensity))
 
-	'''
-	This function returns either the state as is (gain=false) or a state based on gained limiter (limited between 0 and 1), of which the gain can be set by using setGain(gain).
-	A high gain factor works well when appraisals are small and rare, and you want to see the effect of these appraisals
-	A low gain factor (close to 0 but in any case below 1) works well for high frequency and/or large appraisals, so that the effect of these is dampened.
-	@method gamygdala.Agent.getEmotionalState
-	@param {boolean} useGain Whether to use the gain function or not.
-	@return {gamygdala.Emotion[]} An array of emotions.
-	'''
 	def getEmotionalState(self, useGain: bool) -> list:
+		"""
+		This function returns either the state as is (gain=false) or a state based on gained limiter (limited between 0 and 1), of which the gain can be set by using setGain(gain).
+		A high gain factor works well when appraisals are small and rare, and you want to see the effect of these appraisals
+		A low gain factor (close to 0 but in any case below 1) works well for high frequency and/or large appraisals, so that the effect of these is dampened.
+		@method gamygdala.Agent.getEmotionalState
+		@param {boolean} useGain Whether to use the gain function or not.
+		@return {gamygdala.Emotion[]} An array of emotions.
+		"""
 		if useGain:
 			gainState=[]
 			for i in range(len(self.internalState)):
@@ -91,16 +91,16 @@ class Agent:
 		else:
 			return self.internalState
 
-	'''
-	This function returns a summation-based Pleasure Arousal Dominance mapping of the emotional state as is (gain=false), or a PAD mapping based on a gained limiter (limited between 0 and 1), of which the gain can be set by using setGain(gain).
-	It sums over all emotions the equivalent PAD values of each emotion (i.e., [P,A,D]=SUM(Emotion_i([P,A,D])))), which is then gained or not.
-	A high gain factor works well when appraisals are small and rare, and you want to see the effect of these appraisals.
-	A low gain factor (close to 0 but in any case below 1) works well for high frequency and/or large appraisals, so that the effect of these is dampened.
-	@method gamygdala.Agent.getPADState
-	@param {boolean} useGain Whether to use the gain function or not.
-	@return {double[]} An array of doubles with Pleasure at index 0, Arousal at index [1] and Dominance at index [2].
-	'''
 	def getPADState(self, useGain: bool) -> list[int]:
+		"""
+		This function returns a summation-based Pleasure Arousal Dominance mapping of the emotional state as is (gain=false), or a PAD mapping based on a gained limiter (limited between 0 and 1), of which the gain can be set by using setGain(gain).
+		It sums over all emotions the equivalent PAD values of each emotion (i.e., [P,A,D]=SUM(Emotion_i([P,A,D])))), which is then gained or not.
+		A high gain factor works well when appraisals are small and rare, and you want to see the effect of these appraisals.
+		A low gain factor (close to 0 but in any case below 1) works well for high frequency and/or large appraisals, so that the effect of these is dampened.
+		@method gamygdala.Agent.getPADState
+		@param {boolean} useGain Whether to use the gain function or not.
+		@return {double[]} An array of doubles with Pleasure at index 0, Arousal at index [1] and Dominance at index [2].
+		"""
 		PAD=[0, 0, 0]
 		for i in range(len(self.internalState)):
 			PAD[0] += self.internalState[i].intensity*self.mapPAD[self.internalState[i].name][0]
@@ -113,15 +113,15 @@ class Agent:
 			return PAD
 		else:
 			return PAD
- 
-	'''
-	This function prints to the console either the state as is (gain=false) or a state based on gained limiter (limited between 0 and 1), of which the gain can be set by using setGain(gain).
-	A high gain factor works well when appraisals are small and rare, and you want to see the effect of these appraisals
-	A low gain factor (close to 0 but in any case below 1) works well for high frequency and/or large appraisals, so that the effect of these is dampened.
-	@method gamygdala.Agent.printEmotionalState
-	@param {boolean} useGain Whether to use the gain function or not.
-	'''
-	def printEmotionalState(self, useGain: bool):
+
+	def printEmotionalState(self, useGain: bool): 
+		"""
+		This function prints to the console either the state as is (gain=false) or a state based on gained limiter (limited between 0 and 1), of which the gain can be set by using setGain(gain).
+		A high gain factor works well when appraisals are small and rare, and you want to see the effect of these appraisals
+		A low gain factor (close to 0 but in any case below 1) works well for high frequency and/or large appraisals, so that the effect of these is dampened.
+		@method gamygdala.Agent.printEmotionalState
+		@param {boolean} useGain Whether to use the gain function or not.
+		"""
 		output = self.name + ' feels '
 		emotionalState=self.getEmotionalState(useGain)
 		k = 0
@@ -130,13 +130,14 @@ class Agent:
 			output+=emotionalState[i].name+" : "+str(emotionalState[i].intensity)+", "
 		if k>0:
 			print(output)
-	'''
-	Sets the relation this agent has with the agent defined by agentName. If the relation does not exist, it will be created, otherwise it will be updated.
-	@method gamygdala.Agent.updateRelation
-	@param {String} agentName The agent who is the target of the relation.
-	@param {double} like The relation (between -1 and 1).
-	'''
+
 	def updateRelation(self, agentName: str, like: float):
+		"""
+		Sets the relation this agent has with the agent defined by agentName. If the relation does not exist, it will be created, otherwise it will be updated.
+		@method gamygdala.Agent.updateRelation
+		@param {String} agentName The agent who is the target of the relation.
+		@param {double} like The relation (between -1 and 1).
+		"""
 		if not self.hasRelationWith(agentName):
 			#This relation does not exist, just add it.
 			self.currentRelations.append(Relation(agentName,like))   
@@ -146,22 +147,22 @@ class Agent:
 				if self.currentRelations[i].agentName == agentName:
 					self.currentRelations[i].like = like
 
-	'''
-	Checks if this agent has a relation with the agent defined by agentName.
-	@method gamygdala.Agent.hasRelationWith
-	@param {String} agentName The agent who is the target of the relation.
-	@param {boolean} True if the relation exists, otherwise false.
-	'''
 	def hasRelationWith(self, agentName: str) -> bool:
+		"""
+		Checks if this agent has a relation with the agent defined by agentName.
+		@method gamygdala.Agent.hasRelationWith
+		@param {String} agentName The agent who is the target of the relation.
+		@param {boolean} True if the relation exists, otherwise false.
+		"""
 		return self.getRelation(agentName) is not None
 
-	'''
-	Returns the relation object this agent has with the agent defined by agentName.
-	@method gamygdala.Agent.getRelation
-	@param {String} agentName The agent who is the target of the relation.
-	@param {gamygdala.Relation} The relation object or null if non existing.
-	'''
 	def getRelation(self, agentName: str) -> Union[list, None]:
+		"""
+		Returns the relation object this agent has with the agent defined by agentName.
+		@method gamygdala.Agent.getRelation
+		@param {String} agentName The agent who is the target of the relation.
+		@param {gamygdala.Relation} The relation object or null if non existing.
+		"""
 		for i in range(len(self.currentRelations)):
 			if self.currentRelations[i].agentName == agentName:
 				return self.currentRelations[i]    
@@ -172,12 +173,12 @@ class Agent:
 		for r in self.currentRelations:
 			print(r)
 
-	'''
-	Returns the relation object this agent has with the agent defined by agentName.
-	@method gamygdala.Agent.printRelations
-	@param {String} [agentName] The agent who is the target of the relation will only be printed, or when omitted all relations are printed.
-	'''
 	def printRelations(self, agentName: str):
+		"""
+		Returns the relation object this agent has with the agent defined by agentName.
+		@method gamygdala.Agent.printRelations
+		@param {String} [agentName] The agent who is the target of the relation will only be printed, or when omitted all relations are printed.
+		"""
 		output = self.name + ' has the following sentiments:\n   '
 		found=False
 		for i in range(len(self.currentRelations)):
@@ -191,16 +192,16 @@ class Agent:
 		if found:
 			print(output)
 
-	'''
-	This method decays the emotional state and relations according to the decay factor and function defined in gamygdala. 
-	Typically this is called automatically when you use startDecay() in Gamygdala, but you can use it yourself if you want to manage the timing.
-	This function is keeping track of the millis passed since the last call, and will (try to) keep the decay close to the desired decay factor, regardless the time passed
-	So you can call this any time you want (or, e.g., have the game loop call it, or have e.g., Phaser call it in the plugin update, which is default now).
-	Further, if you want to tweak the emotional intensity decay of individual agents, you should tweak the decayFactor per agent not the "frame rate" of the decay (as this doesn't change the rate).
-	@method gamygdala.decayAll
-	@param {gamygdala} gamygdalaInstance A reference to the correct gamygdala instance that contains the decayFunction property to be used )(so you could use different gamygdala instances to manage different groups of  agents)
-	'''
 	def decay(self, gamygdalaInstance, deltaTime=None):
+		"""
+		This method decays the emotional state and relations according to the decay factor and function defined in gamygdala. 
+		Typically this is called automatically when you use startDecay() in Gamygdala, but you can use it yourself if you want to manage the timing.
+		This function is keeping track of the millis passed since the last call, and will (try to) keep the decay close to the desired decay factor, regardless the time passed
+		So you can call this any time you want (or, e.g., have the game loop call it, or have e.g., Phaser call it in the plugin update, which is default now).
+		Further, if you want to tweak the emotional intensity decay of individual agents, you should tweak the decayFactor per agent not the "frame rate" of the decay (as this doesn't change the rate).
+		@method gamygdala.decayAll
+		@param {gamygdala} gamygdalaInstance A reference to the correct gamygdala instance that contains the decayFunction property to be used )(so you could use different gamygdala instances to manage different groups of  agents)
+		"""
 		for i in range(len(self.internalState)):
 			newIntensity=gamygdalaInstance.decayFunction(self.internalState[i].intensity, deltaTime)
 			if newIntensity < 0:
