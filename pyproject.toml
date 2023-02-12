@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Pymygdala"
+version = "0.0.1"
+authors = [
+  { name="L W", email="lwilson2048@gmail.com" },
+]
+description = "Implementation of the Emotional Game Engine Gamydala"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Games/Entertainment",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/lwilson2048/pymygdala"
+"Bug Tracker" = "https://github.com/lwilson2048/pymygdala/issues"
