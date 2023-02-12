@@ -30,7 +30,6 @@ class Gamygdala:
     This is the main appraisal engine class taking care of interpreting a situation emotionally.
     Typically you create one instance of this class and then register all agents (emotional entities) to it,
     as well as all goals.
-    @class Gamygdala
     """
     def __init__(self):
         self.agents = []
@@ -44,9 +43,12 @@ class Gamygdala:
     def createAgent(self, agentName: str) -> Agent:
         """
         A facilitator method that creates a new Agent and registers it for you
-        @method gamygdala.createAgent
-        @param {String} agentName The agent with agentName is created
-        @return {gamygdala.Agent} An agent reference to the newly created agent
+
+        :param agentName: The agent with agentName is created
+        :type agentName: str
+
+        :return: An agent reference to the newly created agent
+        :rtype: Agent
         """
         temp=Agent(agentName)
         self.registerAgent(temp)
@@ -57,12 +59,21 @@ class Gamygdala:
         A facilitator method to create a goal for a particular agent, that also registers the goal to the agent and gamygdala.
         This method is thus handy if you want to keep all gamygdala logic internal to Gamygdala.
         However, if you want to do more sophisticated stuff (e.g., goals for multiple agents, keep track of your own list of goals to also remove them, appraise events per agent without the need for gamygdala to keep track of goals, etc...) this method will probably be doing too much.
-        @method gamygdala.createGoalForAgent
-        @param {String} agentName The agent's name to which the newly created goal has to be added.
-        @param {String} goalName The goal's name.
-        @param {double} goalUtility The goal's utility.
-        @param {boolean} isMaintenanceGoal Defines if the goal is a maintenance goal or not [optional]. The default is that the goal is an achievement goal, i.e., a goal that once it's likelihood reaches true (1) or false (-1) stays that way.
-        @return {gamygdala.Goal} - a goal reference to the newly created goal.
+
+        :param agentName: The agent's name to which the newly created goal has to be added.
+        :type agentName: str
+
+        :param goalName: The goal's name.
+        :type goalName: str
+
+        :param goalUtility: The goal's utility.
+        :type goalUtility: double
+
+        :param isMaintenanceGoal: Defines if the goal is a maintenance goal or not [optional]. The default is that the goal is an achievement goal, i.e., a goal that once it's likelihood reaches true (1) or false (-1) stays that way.
+        :type isMaintenanceGoal: boolean
+
+        :return: - a goal reference to the newly created goal.
+        :rtype: Goal or None
         """
         tempAgent = self.getAgentByName(agentName)
         if tempAgent:
@@ -84,10 +95,15 @@ class Gamygdala:
         """
         A facilitator method to create a relation between two agents. Both source and target have to exist and be registered with this Gamygdala instance.
         This method is thus handy if you want to keep all gamygdala logic internal to Gamygdala.
-        @method gamygdala.createRelation
-        @param {String} sourceName The agent who has the relation (the source)
-        @param {String} targetName The agent who is the target of the relation (the target)
-        @param {double} relation The relation (between -1 and 1).
+
+        :param sourceName: The agent who has the relation (the source)
+        :type sourceName: str
+
+        :param targetName: The agent who is the target of the relation (the target)
+        :type targetName: str
+
+        :param relation: The relation (between -1 and 1).
+        :type relation: double
         """
         source=self.getAgentByName(sourceName)
         target=self.getAgentByName(targetName)
@@ -100,44 +116,58 @@ class Gamygdala:
         """
         A facilitator method to appraise an event. It takes in the same as what the new Belief(...) takes in, creates a belief and appraises it for all agents that are registered.
         This method is thus handy if you want to keep all gamygdala logic internal to Gamygdala.
-        @method gamygdala.appraiseBelief
-        @param {double} likelihood The likelihood of this belief to be true.
-        @param {String} causalAgentName The agent's name of the causal agent of this belief.
-        @param {String[]} affectedGoalNames An array of affected goals' names.
-        @param {double[]} goalCongruences An array of the affected goals' congruences (i.e., the extend to which this event is good or bad for a goal [-1,1]).
-        @param {boolean} [isIncremental] Incremental evidence enforces gamygdala to see this event as incremental evidence for (or against) the list of goals provided, i.e, it will add or subtract this belief's likelihood*congruence from the goal likelihood instead of using the belief as "state" defining the absolute likelihood
+
+        :param likelihood: The likelihood of this belief to be true.
+        :type likelihood: double
+
+        :param causalAgentName: The agent's name of the causal agent of this belief.
+        :type causalAgentName: str
+
+        :param affectedGoalNames: An array of affected goals' names.
+        :type affectedGoalNames: list[str]
+
+        :param goalCongruences: An array of the affected goals' congruences (i.e., the extend to which this event is good or bad for a goal [-1,1]).
+        :type goalCongruences: list[double]
+
+        :param isIncremental: Incremental evidence enforces gamygdala to see this event as incremental evidence for (or against) the list of goals provided, i.e, it will add or subtract this belief's likelihood*congruence from the goal likelihood instead of using the belief as "state" defining the absolute likelihood.
+        :type isIncremental: boolean
         """
         tempBelief=Belief(likelihood, causalAgentName, affectedGoalNames, goalCongruences, isIncremental)
         self.appraise(tempBelief)
 
-    def printAllEmotions(self, gain: bool = True):
+    def printAllEmotions(self, useGain: bool = True):
         """
-        Facilitator method to print all emotional states to the console.	
-        @method gamygdala.printAllEmotions
-        @param {boolean} gain Whether you want to print the gained (true) emotional states or non-gained (false).
+        Facilitator method to print all emotional states to the console.
+
+        :param useGain: Whether you want to print the gained (true) emotional states or non-gained (false).
+        :type useGain: bool
         """
         for i in range(len(self.agents)):
-            self.agents[i].printEmotionalState(gain)
+            self.agents[i].printEmotionalState(useGain)
             self.agents[i].printRelations(None)
 
-    def setGain(self, gain: bool):
+    def setGain(self, gain: float):
         """
         Facilitator to set the gain for the whole set of agents known to gamygdala.
         For more realistic, complex games, you would typically set the gain for each agent type separately, to finetune the intensity of the response.
-        @method gamygdala.setGain
-        @param {double} gain The gain value [0 and 20].
+
+        :param gain: The gain value [0 and 20].
+        :type gain: double
         """
         for i in range(len(self.agents)):
             self.agents[i].setGain(gain)
 
-    def setDecay(self, decayFactor: float, decayFunction):
+    def setDecay(self, decayFactor: float, decayFunction: callable):
         """
         Sets the decay factor and function for emotional decay.
         It sets the decay factor and type for emotional decay, so that an emotion will slowly get lower in intensity.
         Whenever decayAll is called, all emotions for all agents are decayed according to the factor and function set here.
-        @method gamygdala.setDecay
-        @param {double} decayFactor The decayfactor used. A factor of 1 means no decay, a factor 
-        @param {function} decayFunction The decay function tobe used. choose between linearDecay or exponentialDecay (see the corresponding methods)
+
+        :param decayFactor: The decayfactor used. A factor of 1 means no decay, a factor 
+        :type decayFactor: double
+
+        :param decayFunction: The decay function tobe used. choose between linearDecay or exponentialDecay (see the corresponding methods)
+        :type decayFunction: callable
         """
         self.decayFunction=decayFunction
         self.decayFactor=decayFactor
@@ -148,7 +178,9 @@ class Gamygdala:
         The timeMS only defines the interval at which to decay, not the rate over time, that is defined by the decayFactor and function.
         For more complex games (e.g., games where agents are not active when far away from the player, or games that do not need all agents to decay all the time) you should yourself choose when to decay agents individually.
         To do so you can simply call the agent.decay() method (see the agent class).
-        @param {int} timeMS The "framerate" of the decay in milliseconds. 
+
+        :param timeMS: The "framerate" of the decay in milliseconds. 
+        :type timeMS: int
         """
         setInterval(self.decayAll, timeMS, self)
     
@@ -160,8 +192,9 @@ class Gamygdala:
         """
         For every entity in your game (usually NPC's, but can be the player character too) you have to first create an Agent object and then register it using this method.
         Registering the agent makes sure that Gamygdala will be able to emotionally interpret incoming Beliefs about the game state for that agent.
-        @method gamygdala.registerAgent
-        @param {gamygdala.Agent} agent The agent to be registered
+
+        :param agent: The agent to be registered
+        :type agent: Agent
         """
         self.agents.append(agent)
         agent.gamygdalaInstance = self
@@ -169,9 +202,12 @@ class Gamygdala:
     def getAgentByName(self, agentName: str) -> Union[Agent, None]:
         """
         Simple agent getter by name.
-        @method gamygdala.getAgentByName
-        @param {String} agentName The name of the agent to be found.
-        @return {gamygdala.Agent} None or an agent reference that has the name property equal to the agentName argument
+
+        :param agentName: The name of the agent to be found.
+        :type timeMS: int
+
+        :return: None or an agent reference that has the name property equal to the agentName argument
+        :rtype: Agent or None
         """
         for i in range(len(self.agents)):
             if self.agents[i].name == agentName:
@@ -183,8 +219,9 @@ class Gamygdala:
         """
         For every goal that NPC's or player characters can have you have to first create a Goal object and then register it using this method.
         Registering the goals makes sure that Gamygdala will be able to find the correct goal references when a Beliefs about the game state comes in.
-        @method gamygdala.registerGoal
-        @param {gamygdala.Goal} goal The goal to be registered.
+
+        :param goal: The goal to be registered.
+        :type goal: Goal
         """
         if self.getGoalByName(goal.name) == None:
             self.goals.append(goal)
@@ -194,9 +231,12 @@ class Gamygdala:
     def getGoalByName(self, goalName: str) -> Union[Goal, None]:
         """
         Simple goal getter by name.
-        @method gamygdala.getGoalByName
-        @param {String} goalName The name of the goal to be found.
-        @return {gamygdala.Goal} None or a goal reference that has the name property equal to the goalName argument
+
+        :param goalName: The name of the goal to be found.
+        :type goalName: str
+
+        :return: None or a goal reference that has the name property equal to the goalName argument
+        :rtype: Goal
         """
         for i in range(len(self.goals)):
             if self.goals[i].name == goalName:
@@ -210,9 +250,15 @@ class Gamygdala:
         but only if the affected agent (the one owning the goal) == affectedAgent
         this is sometimes needed for efficiency, if you as a game developer know that particular agents can never appraise an event, then you can force Gamygdala to only look at a subset of agents.
         Gamygdala assumes that the affectedAgent is indeed the only goal owner affected, that the belief is well-formed, and will not perform any checks, nor use Gamygdala's list of known goals to find other agents that share this goal (!!!)
-        @method gamygdala.appraise 
-        @param {gamygdala.Belief} belief The current event, in the form of a Belief object, to be appraised
-        @param {gamygdala.Agent} [affectedAgent] The reference to the agent who needs to appraise the event. If given, this is the appraisal perspective (see explanation above).
+
+        :param belief: The current event, in the form of a Belief object, to be appraised
+        :type belief: Belief
+
+        :param affectedAgent: The reference to the agent who needs to appraise the event. If given, this is the appraisal perspective (see explanation above).
+        :type affectedAgent: Agent
+
+        :return:
+        :rtype: bool
         """
         if affectedAgent is None:
             #check all
@@ -297,7 +343,6 @@ class Gamygdala:
         This function is keeping track of the millis passed since the last call, and will (try to) keep the decay close to the desired decay factor, regardless the time passed
         So you can call this any time you want (or, e.g., have the game loop call it, or have e.g., Phaser call it in the plugin update, which is default now).
         Further, if you want to tweak the emotional intensity decay of individual agents, you should tweak the decayFactor per agent not the "frame rate" of the decay (as this doesn't change the rate).
-        @method gamygdala.decayAll
         """
         self.millisPassed=current_milli_time()-self.lastMillis
         self.lastMillis=current_milli_time()
