@@ -139,7 +139,7 @@ for round in range(NUM_ROUNDS):
         # Form the belief
         b = Belief(likelihood, "Article", [goal_name], [article[1]], isIncremental=True)
         g_agent.appraise(b)
-        g_agent.decay(engine, DECAY_SPEED)
+        g_agent.decay(engine.decayFunction, DECAY_SPEED)
 
         # Add to the PAD history for this agent
         step_pads[agent_name] = g_agent.getPADState(True)

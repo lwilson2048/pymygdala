@@ -176,8 +176,9 @@ class Agent:
 	def printRelations(self, agentName: str):
 		"""
 		Returns the relation object this agent has with the agent defined by agentName.
-		@method gamygdala.Agent.printRelations
-		@param {String} [agentName] The agent who is the target of the relation will only be printed, or when omitted all relations are printed.
+
+		:param agentName: The agent who is the target of the relation will only be printed, or when omitted all relations are printed.
+		:type agentName: str
 		"""
 		output = self.name + ' has the following sentiments:\n   '
 		found=False
@@ -192,21 +193,22 @@ class Agent:
 		if found:
 			print(output)
 
-	def decay(self, gamygdalaInstance, deltaTime=None):
+	def decay(self, decayFunction: callable, deltaTime=None):
 		"""
 		This method decays the emotional state and relations according to the decay factor and function defined in gamygdala. 
 		Typically this is called automatically when you use startDecay() in Gamygdala, but you can use it yourself if you want to manage the timing.
 		This function is keeping track of the millis passed since the last call, and will (try to) keep the decay close to the desired decay factor, regardless the time passed
 		So you can call this any time you want (or, e.g., have the game loop call it, or have e.g., Phaser call it in the plugin update, which is default now).
 		Further, if you want to tweak the emotional intensity decay of individual agents, you should tweak the decayFactor per agent not the "frame rate" of the decay (as this doesn't change the rate).
-		@method gamygdala.decayAll
-		@param {gamygdala} gamygdalaInstance A reference to the correct gamygdala instance that contains the decayFunction property to be used )(so you could use different gamygdala instances to manage different groups of  agents)
+
+		:param decayFunction: A reference to the decayFunction property to be used.
+		:type decayFunction: Callable
 		"""
 		for i in range(len(self.internalState)):
-			newIntensity=gamygdalaInstance.decayFunction(self.internalState[i].intensity, deltaTime)
+			newIntensity = decayFunction(self.internalState[i].intensity, deltaTime)
 			if newIntensity < 0:
 				self.internalState.pop(i)
 			else:
 				self.internalState[i].intensity = newIntensity
 		for i in range(len(self.currentRelations)):
-			self.currentRelations[i].decay(gamygdalaInstance)
+			self.currentRelations[i].decay(decayFunction)
