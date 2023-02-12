@@ -1,3 +1,5 @@
+from typing import Union
+
 from gamygdala.agent import Agent
 from gamygdala.concepts import Goal, Relation, Belief, Emotion
 import time
@@ -41,10 +43,10 @@ class Gamygdala:
     @param {String} agentName The agent with agentName is created
     @return {gamygdala.Agent} An agent reference to the newly created agent
     '''
-    def createAgent(self, agentName):
-	    temp=Agent(agentName)
-	    self.registerAgent(temp)
-	    return temp
+    def createAgent(self, agentName: str) -> Agent:
+        temp=Agent(agentName)
+        self.registerAgent(temp)
+        return temp
 
     '''
     A facilitator method to create a goal for a particular agent, that also registers the goal to the agent and gamygdala.
@@ -57,18 +59,18 @@ class Gamygdala:
     @param {boolean} isMaintenanceGoal Defines if the goal is a maintenance goal or not [optional]. The default is that the goal is an achievement goal, i.e., a goal that once it's likelihood reaches true (1) or false (-1) stays that way.
     @return {gamygdala.Goal} - a goal reference to the newly created goal.
     '''
-    def createGoalForAgent(self, agentName, goalName, goalUtility, isMaintenanceGoal=False):
-        tempAgent=self.getAgentByName(agentName)
+    def createGoalForAgent(self, agentName: str, goalName: str, goalUtility: float, isMaintenanceGoal: bool = False) -> Union[Goal, None]:
+        tempAgent = self.getAgentByName(agentName)
         if tempAgent:
-            tempGoal=self.getGoalByName(goalName)
+            tempGoal = self.getGoalByName(goalName)
             if tempGoal:
                 print("Warning: I cannot make a new goal with the same name ", goalName, " as one is registered already. I assume the goal is a common goal and will add the already known goal with that name to the agent ", agentName)
             else:
-                tempGoal= Goal(goalName, goalUtility)
+                tempGoal = Goal(goalName, goalUtility)
                 self.registerGoal(tempGoal)
             tempAgent.addGoal(tempGoal)
             if isMaintenanceGoal:
-                tempGoal.isMaintenanceGoal=isMaintenanceGoal
+                tempGoal.isMaintenanceGoal = isMaintenanceGoal
             return tempGoal
         else:
             print("Error: agent with name ", agentName ," does not exist, so I cannot add a create a goal for it.")
@@ -82,7 +84,7 @@ class Gamygdala:
     @param {String} targetName The agent who is the target of the relation (the target)
     @param {double} relation The relation (between -1 and 1).
     '''
-    def createRelation(self, sourceName, targetName, relation):
+    def createRelation(self, sourceName: str, targetName: str, relation: float):
         source=self.getAgentByName(sourceName)
         target=self.getAgentByName(targetName)
         if source and target and relation>=-1 and relation<=1:
@@ -100,7 +102,7 @@ class Gamygdala:
     @param {double[]} goalCongruences An array of the affected goals' congruences (i.e., the extend to which this event is good or bad for a goal [-1,1]).
     @param {boolean} [isIncremental] Incremental evidence enforces gamygdala to see this event as incremental evidence for (or against) the list of goals provided, i.e, it will add or subtract this belief's likelihood*congruence from the goal likelihood instead of using the belief as "state" defining the absolute likelihood
     '''
-    def appraiseBelief(self, likelihood, causalAgentName, affectedGoalNames, goalCongruences, isIncremental=True):
+    def appraiseBelief(self, likelihood: float, causalAgentName: str, affectedGoalNames: list[str], goalCongruences: list[float], isIncremental: bool = True):
         tempBelief=Belief(likelihood, causalAgentName, affectedGoalNames, goalCongruences, isIncremental)
         self.appraise(tempBelief)
 
@@ -109,7 +111,7 @@ class Gamygdala:
     @method gamygdala.printAllEmotions
     @param {boolean} gain Whether you want to print the gained (true) emotional states or non-gained (false).
     '''
-    def printAllEmotions(self, gain=True):
+    def printAllEmotions(self, gain: bool = True):
         for i in range(len(self.agents)):
             self.agents[i].printEmotionalState(gain)
             self.agents[i].printRelations(None)
@@ -120,7 +122,7 @@ class Gamygdala:
     @method gamygdala.setGain
     @param {double} gain The gain value [0 and 20].
     '''
-    def setGain(self, gain):
+    def setGain(self, gain: bool):
         for i in range(len(self.agents)):
             self.agents[i].setGain(gain)
 
@@ -132,7 +134,7 @@ class Gamygdala:
     @param {double} decayFactor The decayfactor used. A factor of 1 means no decay, a factor 
     @param {function} decayFunction The decay function tobe used. choose between linearDecay or exponentialDecay (see the corresponding methods)
     '''
-    def setDecay(self, decayFactor, decayFunction):
+    def setDecay(self, decayFactor: float, decayFunction):
         self.decayFunction=decayFunction
         self.decayFactor=decayFactor
 
@@ -143,7 +145,7 @@ class Gamygdala:
     To do so you can simply call the agent.decay() method (see the agent class).
     @param {int} timeMS The "framerate" of the decay in milliseconds. 
     '''
-    def startDecay(self, timeMS):
+    def startDecay(self, timeMS: int):
         setInterval(self.decayAll, timeMS, self)
     
     #////////////////////////////////////////////////////////
@@ -156,9 +158,9 @@ class Gamygdala:
     @method gamygdala.registerAgent
     @param {gamygdala.Agent} agent The agent to be registered
     '''
-    def registerAgent(self, agent):
+    def registerAgent(self, agent: Agent):
         self.agents.append(agent)
-        agent.gamygdalaInstance=self
+        agent.gamygdalaInstance = self
     
     '''
     Simple agent getter by name.
@@ -166,7 +168,7 @@ class Gamygdala:
     @param {String} agentName The name of the agent to be found.
     @return {gamygdala.Agent} None or an agent reference that has the name property equal to the agentName argument
     '''
-    def getAgentByName(self, agentName):
+    def getAgentByName(self, agentName: str) -> Union[Agent, None]:
         for i in range(len(self.agents)):
             if self.agents[i].name == agentName:
                 return self.agents[i]
@@ -179,8 +181,8 @@ class Gamygdala:
     @method gamygdala.registerGoal
     @param {gamygdala.Goal} goal The goal to be registered.
     '''
-    def registerGoal(self, goal):
-        if self.getGoalByName(goal.name)==None:
+    def registerGoal(self, goal: Goal):
+        if self.getGoalByName(goal.name) == None:
             self.goals.append(goal)
         else:
             print("Warning: failed adding a second goal with the same name: ", goal.name)
@@ -191,7 +193,7 @@ class Gamygdala:
     @param {String} goalName The name of the goal to be found.
     @return {gamygdala.Goal} None or a goal reference that has the name property equal to the goalName argument
     '''
-    def getGoalByName(self, goalName):
+    def getGoalByName(self, goalName: str) -> Union[Goal, None]:
         for i in range(len(self.goals)):
             if self.goals[i].name == goalName:
                 return self.goals[i]
@@ -207,7 +209,7 @@ class Gamygdala:
     @param {gamygdala.Belief} belief The current event, in the form of a Belief object, to be appraised
     @param {gamygdala.Agent} [affectedAgent] The reference to the agent who needs to appraise the event. If given, this is the appraisal perspective (see explanation above).
     '''
-    def appraise(self, belief, affectedAgent=None):
+    def appraise(self, belief: Belief, affectedAgent: Union[Agent, None] = None) -> bool:
         if affectedAgent is None:
             #check all
             if self.debug:
@@ -227,7 +229,7 @@ class Gamygdala:
                 if not (currentGoal==None):
                     #the goal exists, appraise it
                     utility = currentGoal.utility
-                    deltaLikelihood = self.calculateDeltaLikelihood(currentGoal, belief.goalCongruences[i], belief.likelihood, belief.isIncremental)
+                    deltaLikelihood = self._calculateDeltaLikelihood(currentGoal, belief.goalCongruences[i], belief.likelihood, belief.isIncremental)
                     desirability = belief.goalCongruences[i] * utility
                     if self.debug:
                         print('Evaluated goal: ', currentGoal.name, '(', utility, ', ', deltaLikelihood, ')')	
@@ -238,8 +240,8 @@ class Gamygdala:
                             owner=self.agents[j]
                             if self.debug:
                                 print('....owned by ', owner.name)
-                            self.evaluateInternalEmotion(utility, deltaLikelihood, currentGoal.likelihood, owner)  
-                            self.agentActions(owner.name, belief.causalAgentName, owner.name, desirability, utility, deltaLikelihood) 
+                            self._evaluateInternalEmotion(utility, deltaLikelihood, currentGoal.likelihood, owner)  
+                            self._agentActions(owner.name, belief.causalAgentName, owner.name, desirability, utility, deltaLikelihood) 
                             #now check if anyone has a relation to self goal owner, and update the social emotions accordingly.
                             for k in range(len(self.agents)):
                                 relation=self.agents[k].getRelation(owner.name)
@@ -248,9 +250,9 @@ class Gamygdala:
                                         print(self.agents[k].name, ' has a relationship with ', owner.name)
                                         print(relation)
                                     #The agent has relationship with the goal owner which has nonzero utility, add relational effects to the relations for agent[k]. 
-                                    self.evaluateSocialEmotion(utility, desirability, deltaLikelihood, relation, self.agents[k])
+                                    self._evaluateSocialEmotion(utility, desirability, deltaLikelihood, relation, self.agents[k])
                                     #also add remorse and gratification if conditions are met within (i.e., agent[k] did something bad/good for owner)
-                                    self.agentActions(owner.name, belief.causalAgentName, self.agents[k].name, desirability, utility, deltaLikelihood)
+                                    self._agentActions(owner.name, belief.causalAgentName, self.agents[k].name, desirability, utility, deltaLikelihood)
                                 else:
                                     if self.debug:
                                         print(self.agents[k].name, ' has NO relationship with ', owner.name)
@@ -260,12 +262,12 @@ class Gamygdala:
                 #Loop through every goal in the list of affected goals by self event.
                 currentGoal=affectedAgent.getGoalByName(belief.affectedGoalNames[i])
                 utility = currentGoal.utility
-                deltaLikelihood = self.calculateDeltaLikelihood(currentGoal, belief.goalCongruences[i], belief.likelihood, belief.isIncremental)
+                deltaLikelihood = self._calculateDeltaLikelihood(currentGoal, belief.goalCongruences[i], belief.likelihood, belief.isIncremental)
                 desirability = belief.goalCongruences[i] * utility
                 #assume affectedAgent is the only owner to be considered in self appraisal round.
                 owner=affectedAgent
-                self.evaluateInternalEmotion(utility, deltaLikelihood, currentGoal.likelihood, owner)  
-                self.agentActions(owner.name, belief.causalAgentName, owner.name, desirability, utility, deltaLikelihood) 
+                self._evaluateInternalEmotion(utility, deltaLikelihood, currentGoal.likelihood, owner)  
+                self._agentActions(owner.name, belief.causalAgentName, owner.name, desirability, utility, deltaLikelihood) 
                 #now check if anyone has a relation to self goal owner, and update the social emotions accordingly.
                 for k in range(len(self.agents)):
                     relation=self.agents[k].getRelation(owner.name)
@@ -274,9 +276,9 @@ class Gamygdala:
                             print(self.agents[k].name, ' has a relationship with ', owner.name)
                             print(relation)
                         #The agent has relationship with the goal owner which has nonzero utility, add relational effects to the relations for agent[k]. 
-                        self.evaluateSocialEmotion(utility, desirability, deltaLikelihood, relation, self.agents[k])
+                        self._evaluateSocialEmotion(utility, desirability, deltaLikelihood, relation, self.agents[k])
                         #also add remorse and gratification if conditions are met within (i.e., agent[k] did something bad/good for owner)
-                        self.agentActions(owner.name, belief.causalAgentName, self.agents[k].name, desirability, utility, deltaLikelihood) 
+                        self._agentActions(owner.name, belief.causalAgentName, self.agents[k].name, desirability, utility, deltaLikelihood) 
                     else:
                         if self.debug:
                             print(self.agents[k].name, ' has NO relationship with ', owner.name)
@@ -303,30 +305,30 @@ class Gamygdala:
     #//Below this is internal gamygdala stuff not to be used publicly (i.e., never call these methods).
     #////////////////////////////////////////////////////////
     
-    def calculateDeltaLikelihood(self, goal, congruence, likelihood, isIncremental):
+    def _calculateDeltaLikelihood(self, goal: Goal, congruence: float, likelihood: float, isIncremental: bool) -> float:
         #Defines the change in a goal's likelihood due to the congruence and likelihood of a current event.
         #We cope with two types of beliefs: incremental and absolute beliefs. Incrementals have their likelihood added to the goal, absolute define the current likelihood of the goal
         #And two types of goals: maintenance and achievement. If an achievement goal (the default) is -1 or 1, we can't change it any more (unless externally and explicitly by changing the goal.likelihood).
         oldLikelihood = goal.likelihood 
         newLikelihood = None
-        if goal.isMaintenanceGoal==False and (oldLikelihood>=1 or oldLikelihood<=-1):
-            return 0
+        if goal.isMaintenanceGoal==False and (oldLikelihood >= 1.0 or oldLikelihood <= -1.0):
+            return 0.0
         
         if (goal.calculateLikelyhood is not None):
             newLikelihood = goal.calculateLikelyhood()
         else:
             if isIncremental:
-                newLikelihood = oldLikelihood + likelihood*congruence
-                newLikelihood= max(min(newLikelihood,1), -1)
+                newLikelihood = oldLikelihood + likelihood * congruence
+                newLikelihood= max(min(newLikelihood, 1.0), -1.0)
             else:
-                newLikelihood = (congruence * likelihood + 1.0)/2.0
-        goal.likelihood=newLikelihood
+                newLikelihood = (congruence * likelihood + 1.0) / 2.0
+        goal.likelihood = newLikelihood
         if oldLikelihood is not None:
             return newLikelihood - oldLikelihood
         else:
             return newLikelihood
 
-    def evaluateInternalEmotion(self, utility, deltaLikelihood, likelihood, agent):
+    def _evaluateInternalEmotion(self, utility: float, deltaLikelihood: float, likelihood: float, agent: Agent):
         #This method evaluates the event in terms of internal emotions that do not need relations to exist, such as hope, fear, etc..
         positive = False
         intensity = 0
@@ -370,14 +372,14 @@ class Gamygdala:
             for i in range(len(emotion)):
                 agent.updateEmotionalState(Emotion(emotion[i], intensity))
 
-    def agentActions(self, affectedName, causalName, selfName, desirability, utility, deltaLikelihood):
+    def _agentActions(self, affectedName: str, causalName: str, selfName: str, desirability: float, utility: float, deltaLikelihood: float):
         if causalName is not None and causalName != '':
             #If the causal agent is None or empty, then we we assume the event was not caused by an agent.
             #There are three cases here.
             #The affected agent is SELF and causal agent is other.
             #The affected agent is SELF and causal agent is SELF.
             #The affected agent is OTHER and causal agent is SELF.
-            emotion = Emotion(None,None)
+            emotion = Emotion("", 0.0)
             relation = None
             if affectedName == selfName and selfName != causalName:
                 #Case one 
@@ -421,25 +423,25 @@ class Gamygdala:
     #You can set Gamygdala to use this function for all emotion decay by calling setDecay() and passing this function as second parameter. This function is not to be called directly.
     #@method gamygdala.linearDecay
     '''
-    def linearDecay(self, value, deltaTime=None):
+    def linearDecay(self, value: float, deltaTime: Union[float, None] = None) -> float:
         #assumes the decay of the emotional state intensity is linear with a factor equal to decayFactor per second.
         dt = deltaTime
         if dt is None:
-            dt = self.millisPassed/1000
-        return value-self.decayFactor*(dt)
+            dt = self.millisPassed / 1000
+        return value - self.decayFactor * (dt)
 
     '''
     An exponential decay function that will decrease the emotion intensity of an emotion every tick by a factor defined by the decayFactor in the gamygdala instance.
     You can set Gamygdala to use this function for all emotion decay by calling setDecay() and passing this function as second parameter. This function is not to be called directly.
     @method gamygdala.exponentialDecay 
     '''
-    def exponentialDecay(self, value, deltaTime=None):
+    def exponentialDecay(self, value: float, deltaTime: Union[float, None] = None) -> float:
         dt = deltaTime
         if dt is None:
             dt = self.millisPassed/1000
-        return value*math.pow(self.decayFactor, dt)
+        return value * math.pow(self.decayFactor, dt)
 
-    def evaluateSocialEmotion(self, utility, desirability, deltaLikelihood, relation, agent):
+    def _evaluateSocialEmotion(self, utility: float, desirability: float, deltaLikelihood: float, relation: Relation, agent: Agent):
         #This function is used to evaluate happy-for, pity, gloating or resentment.
         #Emotions that arise when we evaluate events that affect goals of others.
         #The desirability is the desirability from the goal owner's perspective.
