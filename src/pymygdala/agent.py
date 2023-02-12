@@ -4,9 +4,9 @@ from pymygdala.concepts import Emotion, Goal, Belief, Relation
 class Agent:
 	"""
 	self is the emotion agent class taking care of emotion management for one entity 
-	@class pygamygdala.Agent
-	@constructor 
-	@param {String} name The name of the agent to be created. self name is used as ref throughout the appraisal engine.
+
+	:param name: The name of the agent to be created. self name is used as ref throughout the appraisal engine.
+	:type name: str
 	"""
 	def __init__(self, name='agent'):
 		self.name = name
@@ -73,14 +73,17 @@ class Agent:
 		#copy on keep, we need to maintain a list of current emotions for the state, not a list references to the appraisal engine
 		self.internalState.append(Emotion(emotion.name, emotion.intensity))
 
-	def getEmotionalState(self, useGain: bool) -> list:
+	def getEmotionalState(self, useGain: bool) -> list[Emotion]:
 		"""
 		This function returns either the state as is (gain=false) or a state based on gained limiter (limited between 0 and 1), of which the gain can be set by using setGain(gain).
 		A high gain factor works well when appraisals are small and rare, and you want to see the effect of these appraisals
 		A low gain factor (close to 0 but in any case below 1) works well for high frequency and/or large appraisals, so that the effect of these is dampened.
-		@method gamygdala.Agent.getEmotionalState
-		@param {boolean} useGain Whether to use the gain function or not.
-		@return {gamygdala.Emotion[]} An array of emotions.
+
+		:param useGain: Whether to use the gain function or not.
+		:type useGain: bool
+
+		:return: An array of emotions.
+		:rtype: list[Emotion]
 		"""
 		if useGain:
 			gainState=[]
@@ -97,9 +100,12 @@ class Agent:
 		It sums over all emotions the equivalent PAD values of each emotion (i.e., [P,A,D]=SUM(Emotion_i([P,A,D])))), which is then gained or not.
 		A high gain factor works well when appraisals are small and rare, and you want to see the effect of these appraisals.
 		A low gain factor (close to 0 but in any case below 1) works well for high frequency and/or large appraisals, so that the effect of these is dampened.
-		@method gamygdala.Agent.getPADState
-		@param {boolean} useGain Whether to use the gain function or not.
-		@return {double[]} An array of doubles with Pleasure at index 0, Arousal at index [1] and Dominance at index [2].
+
+		:param useGain: Whether to use the gain function or not.
+		:type useGain: bool
+
+		:return: An array of doubles with Pleasure at index 0, Arousal at index [1] and Dominance at index [2].
+		:rtype: list[float]
 		"""
 		PAD=[0, 0, 0]
 		for i in range(len(self.internalState)):
@@ -119,8 +125,9 @@ class Agent:
 		This function prints to the console either the state as is (gain=false) or a state based on gained limiter (limited between 0 and 1), of which the gain can be set by using setGain(gain).
 		A high gain factor works well when appraisals are small and rare, and you want to see the effect of these appraisals
 		A low gain factor (close to 0 but in any case below 1) works well for high frequency and/or large appraisals, so that the effect of these is dampened.
-		@method gamygdala.Agent.printEmotionalState
-		@param {boolean} useGain Whether to use the gain function or not.
+
+		:param useGain: Whether to use the gain function or not.
+		:type useGain: bool
 		"""
 		output = self.name + ' feels '
 		emotionalState=self.getEmotionalState(useGain)
@@ -134,9 +141,12 @@ class Agent:
 	def updateRelation(self, agentName: str, like: float):
 		"""
 		Sets the relation this agent has with the agent defined by agentName. If the relation does not exist, it will be created, otherwise it will be updated.
-		@method gamygdala.Agent.updateRelation
-		@param {String} agentName The agent who is the target of the relation.
-		@param {double} like The relation (between -1 and 1).
+
+		:param agentName: The agent who is the target of the relation.
+		:type agentName: str
+
+		:param like: The relation (between -1 and 1).
+		:type like: float
 		"""
 		if not self.hasRelationWith(agentName):
 			#This relation does not exist, just add it.
@@ -150,18 +160,24 @@ class Agent:
 	def hasRelationWith(self, agentName: str) -> bool:
 		"""
 		Checks if this agent has a relation with the agent defined by agentName.
-		@method gamygdala.Agent.hasRelationWith
-		@param {String} agentName The agent who is the target of the relation.
-		@param {boolean} True if the relation exists, otherwise false.
+
+		:param agentName: The agent who is the target of the relation.
+		:type agentName: str
+
+		:return: True if the relation exists, otherwise false.
+		:rtype: bool
 		"""
 		return self.getRelation(agentName) is not None
 
-	def getRelation(self, agentName: str) -> Union[list, None]:
+	def getRelation(self, agentName: str) -> Union[Relation, None]:
 		"""
 		Returns the relation object this agent has with the agent defined by agentName.
-		@method gamygdala.Agent.getRelation
-		@param {String} agentName The agent who is the target of the relation.
-		@param {gamygdala.Relation} The relation object or null if non existing.
+
+		:param agentName: The agent who is the target of the relation.
+		:type agentName: str
+
+		:return: The given relation or None
+		:rtype: Relation or None
 		"""
 		for i in range(len(self.currentRelations)):
 			if self.currentRelations[i].agentName == agentName:
