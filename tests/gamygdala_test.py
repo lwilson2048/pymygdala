@@ -2,11 +2,25 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import random
+
 from pymygdala.engines import Gamygdala
 from pymygdala.concepts import Goal, Belief
 from pymygdala.agent import Agent
 
-def generateReactionForAgent(g_agent):
+def clamp(num, min_value, max_value):
+   return max(min(num, max_value), min_value)
+
+def generateReactionForAgent(g_agent: Agent, cur_pad: list[float], pad_delta: list[float]) -> float:
+
+    # Pleasure delta multiplied by current arousal
+    # When should we generate a -1 or 1, maximums? Obviously arousal matters here. It made you
+    # have the most extreme reaction. 
+    # Crossing the threshold of 0 for pleasure should cause a significant reaction as well, this article made me 
+    # happy or sad or whatever.
+    # ΔP * (abs(A) * AROUSAL_MULT)
+
+    return clamp(pad_delta[0] * (abs(cur_pad[1]) + 1.0), -1.0, 1.0)
+
     print(g_agent.getEmotionalState(True))
 
 def printAgentHistory(agent: str, pads_per_step: list[dict[str, list[float]]], article_history: list[tuple[str, float]]):
@@ -78,7 +92,7 @@ ALLOWED_THINGS = ["\N{baby}", "\N{rat}", "\N{cat}", "\N{dog}", "\N{potato}"]
 # Number of personal opinions per agent
 NUM_OPINIONS = 5
 
-NAMES = ["John", "Jan", "Juan", "Jean", "Johann"]
+NAMES = ["John", "Jan", "Juan"]#, "Jean", "Johann"]
 
 # An article is a tuple of the form ("<thing>", attitude: [-1.0, 1.0])
 
@@ -91,7 +105,7 @@ agents : dict[str, Agent] = {}
 # ie {agent_name: {goal_name: goal}}
 goals : dict[str, dict[str: Goal]] = {}
 
-NUM_ROUNDS = 10
+NUM_ROUNDS = 5
 likelihood = 1.0 / float(NUM_ROUNDS)
 DECAY_SPEED = 2
 EMO_GAIN = 20
@@ -154,10 +168,17 @@ for round in range(NUM_ROUNDS):
 
         cur_pad = g_agent.getPADState(True)
 
+        pad_delta = [cur_pad[i] - prev_pad[i] for i in range(3)]
+
+
         agent_opinion = g_agent.getGoalByName(goal_name).utility
         # "Jim who likes rats"
-        print("%s who %s %s: " % (agent_name, fuzzyOpinion(agent_opinion), article[0]))
-        print("Mood delta: %s" % (str([cur_pad[i] - prev_pad[i] for i in range(3)])))
+        print("%s %f %s: " % (agent_name, agent_opinion, article[0]))
+        print("Mood delta: %s" % (str(pad_delta)))
+        print("Reaction to article: %s" % generateReactionForAgent(g_agent, cur_pad, pad_delta))
+        g_agent.printEmotionalState(True)
+        for relation in g_agent.currentRelations:
+            print("Relationship to %s: %f" % (relation.agentName, relation.like))
         print("++++")
 
     pads_per_step.append(step_pads)

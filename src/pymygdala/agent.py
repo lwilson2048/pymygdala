@@ -11,7 +11,7 @@ class Agent:
 	def __init__(self, name='agent'):
 		self.name = name
 		self.goals = []
-		self.currentRelations = []
+		self.currentRelations: list[Relation] = []
 		self.internalState = []
 		self.gamygdalaInstance = None
 		self.mapPAD = {}
