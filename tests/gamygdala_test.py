@@ -7,6 +7,8 @@ from pymygdala.engines import Gamygdala
 from pymygdala.concepts import Goal, Belief
 from pymygdala.agent import Agent
 
+# Need to rework this to track and graph PAD states
+
 def clamp(num, min_value, max_value):
    return max(min(num, max_value), min_value)
 
@@ -133,6 +135,8 @@ article_history = []
 #pads_per_step[step][agent] = [Their PAD state at step]
 pads_per_step: list[dict[str, list[float]]] = []
 
+reactions_per_step: list[dict[str, float]] = []
+
 for round in range(NUM_ROUNDS):
     # Generate the article
     article = (random.choice(ALLOWED_THINGS), random.uniform(-1.0, 1.0))
@@ -141,6 +145,7 @@ for round in range(NUM_ROUNDS):
     print("Round %d article: (%s, %s)" % (round, article[0], fuzzyOpinion(article[1])))
 
     step_pads: dict[str, list[float]] = {}
+    step_reactions: dict[str, float] = {}
 
     # Submit the article for agents to review
     for agent_name, g_agent in agents.items():
@@ -151,16 +156,13 @@ for round in range(NUM_ROUNDS):
             continue
 
         # Form the belief
-        b = Belief(likelihood, "Article", [goal_name], [article[1]], isIncremental=True)
-        g_agent.appraise(b)
+        belief = Belief(likelihood, "Article", [goal_name], [article[1]], isIncremental=True)
+        g_agent.appraise(belief)
         g_agent.decay(engine.decayFunction, DECAY_SPEED)
 
         # Add to the PAD history for this agent
         step_pads[agent_name] = g_agent.getPADState(True)
 
-        #g_agent.printAllRelations()
-        #generateReactionForAgent(g_agent)
-        
         if round == 0:
             prev_pad = [0.0, 0.0, 0.0]
         else:
@@ -170,25 +172,44 @@ for round in range(NUM_ROUNDS):
 
         pad_delta = [cur_pad[i] - prev_pad[i] for i in range(3)]
 
-
         agent_opinion = g_agent.getGoalByName(goal_name).utility
+
+        reaction = generateReactionForAgent(g_agent, cur_pad, pad_delta)
+        step_reactions[agent_name] = reaction
         # "Jim who likes rats"
         print("%s %f %s: " % (agent_name, agent_opinion, article[0]))
         print("Mood delta: %s" % (str(pad_delta)))
-        print("Reaction to article: %s" % generateReactionForAgent(g_agent, cur_pad, pad_delta))
+        print("Reaction to article: %s" % reaction)
         g_agent.printEmotionalState(True)
         for relation in g_agent.currentRelations:
             print("Relationship to %s: %f" % (relation.agentName, relation.like))
         print("++++")
 
-    pads_per_step.append(step_pads)
+    for reaction_haver, reaction in step_reactions.items():
+        for agent_name, g_agent in agents.items():
+            if agent_name == reaction_haver:
+                continue
 
-    #engine.printAllEmotions()
+            goal_name = agent_name + "_" + article[0]
+            if not g_agent.hasGoal(goal_name):
+                print("%s skipping due to no interest in %s" % (agent_name, article[0]))
+                continue
+
+            prev_pad = g_agent.getPADState(True)
+
+            belief = Belief(likelihood, reaction_haver, [goal_name], [reaction], isIncremental=True)
+            g_agent.appraise(belief)
+            g_agent.decay(engine.decayFunction, DECAY_SPEED)
+
+            cur_pad = g_agent.getPADState(True)
+
+            pad_delta = [cur_pad[i] - prev_pad[i] for i in range(3)]
+            print("%s's reaction to %s's reaction: %s" % (agent_name, reaction_haver, str(pad_delta)))
+
+    pads_per_step.append(step_pads)
+    reactions_per_step.append(step_reactions)
 
     print("------------------------------------")
-    # Agents submit their opinion of the article
-    # Agents react to each others reactions. Apparently Gamygdala decay function handles relationships?
-    # Update the relations in NetworkX
 
 # Print out the graph again
 
